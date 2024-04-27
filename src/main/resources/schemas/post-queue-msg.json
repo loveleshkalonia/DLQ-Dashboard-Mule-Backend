@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "body": {
+        "type": "object",
+        "properties": {
+          "orderId": { "type": "string" },
+          "customerName": { "type": "string" },
+          "shippingAddress": { "type": "string" },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "itemId": { "type": "string" },
+                "itemName": { "type": "string" },
+                "quantity": { "type": "integer" },
+                "unitPrice": { "type": "number" }
+              },
+              "required": ["itemId", "itemName", "quantity", "unitPrice"]
+            }
+          },
+          "totalAmount": { "type": "number" }
+        },
+        "required": ["orderId", "customerName", "shippingAddress", "items", "totalAmount"]
+      },
+      "messageAttributes": {
+        "type": "object",
+        "properties": {
+          "retryCount": {
+            "type": "object",
+            "properties": {
+              "dataType": { "type": "string", "enum": ["Number"] },
+              "stringValue": { "type": "string" }
+            },
+            "required": ["dataType", "stringValue"]
+          },
+          "errorCode": {
+            "type": "object",
+            "properties": {
+              "dataType": { "type": "string", "enum": ["String"] },
+              "stringValue": { "type": "string" }
+            },
+            "required": ["dataType", "stringValue"]
+          },
+          "errorMessage": {
+            "type": "object",
+            "properties": {
+              "dataType": { "type": "string", "enum": ["String"] },
+              "stringValue": { "type": "string" }
+            },
+            "required": ["dataType", "stringValue"]
+          },
+          "msgRetriable": {
+            "type": "object",
+            "properties": {
+              "dataType": { "type": "string", "enum": ["String"] },
+              "stringValue": { "type": "string", "enum": ["true", "false"] }
+            },
+            "required": ["dataType", "stringValue"]
+          }
+        },
+        "required": ["retryCount", "errorCode", "errorMessage", "msgRetriable"]
+      }
+    },
+    "required": ["body", "messageAttributes"]
+  }
+}

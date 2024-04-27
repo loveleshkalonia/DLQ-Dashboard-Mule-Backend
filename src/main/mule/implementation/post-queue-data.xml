@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:sqs="http://www.mulesoft.org/schema/mule/sqs"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="sf-post-queue-messages" doc:id="344224d8-720b-4161-b3d0-4411c9e81969" >
+		<json:validate-schema doc:name="Queue Msg" doc:id="0c9e23ca-c540-4a1b-9a61-1fac69e3474b" schema="schemas/post-queue-msg.json"/>
+		<sqs:get-queue-url doc:name="URI: queueName | Set Var queueUrl" doc:id="afc7f62b-f7a6-4aed-857f-5feb985a7bf0" config-ref="Amazon_SQS_Configuration" queueName="#[attributes.uriParams.queueName]" target="queueUrl" />
+		<ee:transform doc:name="Add id, deduplicationId, groupId" doc:id="25374f02-eb5a-47cb-86b7-52dc0adc33b5" >
+			<ee:message >
+				<ee:set-payload resource="dwl/post-queue-data/msg-add-id-dedupId-groupId.dwl" />
+			</ee:message>
+		</ee:transform>
+		<foreach doc:name="For Every 10 Messages" doc:id="099bba26-9edf-4a41-8b1b-aa3a74858d9b" collection="#[payload]" batchSize="10">
+			<sqs:send-message-batch doc:name="Input Payload to queueUrl" doc:id="46edbf20-ff68-46ee-82f4-1ada066d5b4b" config-ref="Amazon_SQS_Configuration" queueUrl="#[vars.queueUrl]" />
+			<ee:transform doc:name="Collect Response in Var result" doc:id="7f4e1613-5da3-4fd7-9fd2-e886efbdaacb" >
+				<ee:message >
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable resource="dwl/post-queue-data/var-result-collect-send-msg-batch-response.dwl" variableName="result" />
+				</ee:variables>
+			</ee:transform>
+				</foreach>
+		<set-payload value="#[vars.result]" doc:name="Var result" doc:id="6581e067-d806-4587-9a1b-138dd665085e" />
+		<logger level="INFO" doc:name="Payload" doc:id="02d527c0-976c-423e-8519-2e5b0da9e88f" message="#[payload]" />
+	</sub-flow>
+</mule>

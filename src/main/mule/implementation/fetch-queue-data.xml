@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:java="http://www.mulesoft.org/schema/mule/java" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:sqs="http://www.mulesoft.org/schema/mule/sqs"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="sf-get-active-queues" doc:id="d8c413db-b850-40b8-8771-33342e57aef3" >
+		<sqs:list-queues doc:name="All" doc:id="2f0347a9-7bc0-4d77-a43d-396e193f68d2" config-ref="Amazon_SQS_Configuration" />
+		<parallel-foreach doc:name="Parallel For Each Queue" doc:id="5c7cea72-13bc-40ae-97a7-1f0067f66a00" collection="#[payload]">
+			<sqs:get-approximate-number-of-messages doc:name="Msg Count" doc:id="efce7137-b162-4446-b533-91654344ef94" config-ref="Amazon_SQS_Configuration" queueUrl="#[payload]" target="count" />
+			<!-- [STUDIO:"All Queue Attributes"]<sqs:get-queue-attributes doc:name="All Queue Attributes" doc:id="c05b8e66-4f16-4b0e-bb7b-76b75a1ee899" config-ref="Amazon_SQS_Configuration" queueUrl="#[payload&#93;" target="queueAttributes">
+				<sqs:attribute-names >
+					<sqs:attribute-name value="All" />
+				</sqs:attribute-names>
+			</sqs:get-queue-attributes> [STUDIO] -->
+			<ee:transform doc:name="Build Object" doc:id="ab2f98a5-2cbb-4e2a-a52d-add4a8ef4d20">
+				<ee:message>
+					<ee:set-payload resource="dwl/fetch-queue-data/msg-build-queue-object.dwl" />
+				</ee:message>
+			</ee:transform>
+		</parallel-foreach>
+		<ee:transform doc:name="Extract Payload &amp; Filter DLQs" doc:id="20fabc13-222d-434e-be52-b5d6ddfc8ab1">
+			<ee:message>
+				<ee:set-payload resource="dwl/fetch-queue-data/msg-extract-filter-dlqs.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Payload" doc:id="e4e2a332-50c4-4b83-a96c-efcd0df7ed93" message="#[payload]" />
+	</sub-flow>
+	<sub-flow name="sf-get-queue-messages" doc:id="c66b88f1-4eab-498e-ad5e-367dd8ab3e18" >
+		<sqs:get-queue-url doc:name="URI: queueName" doc:id="c8585a3a-4757-47ac-accf-9fcc6e010a0d" config-ref="Amazon_SQS_Configuration" queueName="#[attributes.uriParams.queueName]"/>
+		<sqs:read doc:name="10 Messages" doc:id="c0a40464-dd62-4d35-a47b-7455c7c75199" config-ref="Amazon_SQS_Configuration" queueUrl="#[payload]" maxNumberOfMessages="10"/>
+		<ee:transform doc:name="Remove binaryValue Key" doc:id="7e8c04fa-4e19-4883-a2cc-25997f7f6359" >
+			<ee:message >
+				<ee:set-payload resource="dwl/fetch-queue-data/msg-remove-binaryValue-key.dwl" />
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Read Body as Json" doc:id="042fe50f-5bef-4414-b338-f4285166cd50" >
+			<ee:message >
+				<ee:set-payload resource="dwl/fetch-queue-data/msg-read-json-body.dwl" />
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Payload" doc:id="db3832f0-b7c9-4997-b2b0-ba947b10b705" message="#[payload]" />
+	</sub-flow>
+</mule>

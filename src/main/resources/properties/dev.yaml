@@ -1,0 +1,10 @@
+aws:
+  region: "dummy"
+  role:
+    arn: "dummy"
+  access:
+    key: "dummy"
+  secret:
+    key: "dummy"
+  sqs:
+    maxPollingDuration: "10"

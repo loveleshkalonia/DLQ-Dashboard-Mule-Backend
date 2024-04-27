@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:sqs="http://www.mulesoft.org/schema/mule/sqs"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="mf-dlq-dashboard-get-active-queues" doc:id="7ae31e65-db37-4556-9357-d9d710f85205" >
+		<http:listener doc:name="GET /Active" doc:id="3023c333-dfca-44bb-a1b9-6e29e9190b4c" config-ref="HTTP_Listener_config" path="/Active" allowedMethods="GET">
+			<http:error-response >
+				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<flow-ref doc:name="sf-get-active-queues" doc:id="faff1d7b-426b-461f-a600-c75a33fddb84" name="sf-get-active-queues" />
+		<flow-ref doc:name="sf-final-presenter" doc:id="14e78574-fab8-44f2-b704-36a29cff0544" name="sf-final-presenter"/>
+		<error-handler ref="error-handler" />
+	</flow>
+	<flow name="mf-dlq-dashboard-get-queue-messages" doc:id="a9e99352-1332-4a40-81fc-7710f37d160f" >
+		<http:listener doc:name="GET /{queueName}" doc:id="b80091a3-2fd3-4175-9657-2ab563a2ef3c" config-ref="HTTP_Listener_config" path="/{queueName}" allowedMethods="GET" >
+			<http:error-response >
+				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<flow-ref doc:name="sf-get-queue-messages" doc:id="e7b57d37-5319-4b24-a052-e11a61ef0b0e" name="sf-get-queue-messages" />
+		<flow-ref doc:name="sf-final-presenter" doc:id="833e0082-f161-47b5-a292-595623bca440" name="sf-final-presenter" />
+		<error-handler ref="error-handler" />
+	</flow>
+	<flow name="mf-dlq-dashboard-post-queue-messages" doc:id="7c43b281-dc5e-4f27-8b6c-edd817c8af18" >
+		<http:listener doc:name="POST /{queueName}" doc:id="6a71e4c2-59ed-4264-84b7-f69ec0a109d8" config-ref="HTTP_Listener_config" path="/{queueName}" allowedMethods="POST" >
+			<http:error-response >
+				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<flow-ref doc:name="sf-post-queue-messages" doc:id="98907140-cb2c-43a3-9376-ccf62537d8e2" name="sf-post-queue-messages" />
+		<flow-ref doc:name="sf-final-presenter" doc:id="6749d5b1-2767-4d71-8081-76c823079320" name="sf-final-presenter" />
+		<error-handler ref="error-handler" />
+	</flow>
+</mule>
