@@ -15,7 +15,7 @@ VM arguments example:
 
 If you need help setting up an AWS IAM Role to run this code locally, click [here](https://www.loveleshkalonia.com/2023/08/role-based-aws-setup-for-mulesoft-s3-connectors-on-new-object-component.html#:~:text=and%20Private%20Space.-,Local%20Run%20Setup,-As%20previously%20mentioned).
 
-You can find sample API Requests collection to test here: "/hoppscotch-collection/DLQ-Dashboard-Mule-Backend.json"
+You can find sample API Requests collection to test here: "/hoppscotch-collection/DLQ-Dashboard-Mule-Backend.json".
 
 Available endpoints:
 
@@ -25,9 +25,24 @@ Fetch all active SQS queues whose name contains the "-dlq" string.
 
 ## GET: /Queue/{queueName}
 
-Read first 10 messages from the specified {queueName} sqs queue. Example URI parameter: "ghost-dlq.fifo"
+Read first 10 (Maximum) messages from the specified {queueName} SQS queue. Example URI parameter: "ghost-dlq.fifo".
 
 ## POST: /Queue/{queueName}
 
-Push messages to the specified {queueName} sqs queue. Example URI parameter: "ghost-dlq.fifo"
-The body for this request is validated against the "/src/main/resources/schemas/post-queue-msg.json" JSON schema. You can also find an example payload in the Hoppscotch collection.
+Push messages to the specified {queueName} SQS queue. Example URI parameter: "ghost-dlq.fifo".\
+The body for this request is a JSON Array of messages. It is validated against the "/src/main/resources/schemas/post-queue-msg.json" JSON schema.\
+You can find an example payload in the Hoppscotch collection.
+
+## GET: /Queue/Purge/{queueName}
+
+Purge messages from the specified {queueName} SQS queue. Example URI parameter: "ghost-dlq.fifo".
+
+## POST: /Queue/Delete/{queueName}
+
+Delete (From the first 10) messages (Maximum 10) from the specified {queueName} SQS queue. Example URI parameter: "ghost-dlq.fifo".\
+The body for this request is an Array of Strings which represensts message "id" of an SQS message. It is validated against the "/src/main/resources/schemas/delete-queue-msg.json" JSON schema.\
+You can find an example payload in the Hoppscotch collection.
+
+### Important Note:
+
+I would recommend setting the Visibility Timeout to approximately 3-5 seconds. The reason for this is to account for the operation of the 'POST: /Queue/Delete/{queueName}' endpoint. This also implies that consecutive requests made to fetch the approximate number of messages in the queue or to read the messages from the queue should also be made with a gap of 3-5 seconds.

@@ -25,10 +25,9 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<ee:set-payload resource="dwl/fetch-queue-data/msg-extract-filter-dlqs.dwl" />
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Payload" doc:id="e4e2a332-50c4-4b83-a96c-efcd0df7ed93" message="#[payload]" />
 	</sub-flow>
 	<sub-flow name="sf-get-queue-messages" doc:id="c66b88f1-4eab-498e-ad5e-367dd8ab3e18" >
-		<sqs:get-queue-url doc:name="URI: queueName" doc:id="c8585a3a-4757-47ac-accf-9fcc6e010a0d" config-ref="Amazon_SQS_Configuration" queueName="#[attributes.uriParams.queueName]"/>
+		<sqs:get-queue-url doc:name="Var queueName" doc:id="c8585a3a-4757-47ac-accf-9fcc6e010a0d" config-ref="Amazon_SQS_Configuration" queueName="#[vars.queueName]"/>
 		<sqs:read doc:name="10 Messages" doc:id="c0a40464-dd62-4d35-a47b-7455c7c75199" config-ref="Amazon_SQS_Configuration" queueUrl="#[payload]" maxNumberOfMessages="10"/>
 		<ee:transform doc:name="Remove binaryValue Key" doc:id="7e8c04fa-4e19-4883-a2cc-25997f7f6359" >
 			<ee:message >
@@ -40,6 +39,5 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<ee:set-payload resource="dwl/fetch-queue-data/msg-read-json-body.dwl" />
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Payload" doc:id="db3832f0-b7c9-4997-b2b0-ba947b10b705" message="#[payload]" />
 	</sub-flow>
 </mule>

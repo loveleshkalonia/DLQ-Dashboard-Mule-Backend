@@ -14,6 +14,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		</http:listener>
 		<flow-ref doc:name="sf-get-active-queues" doc:id="faff1d7b-426b-461f-a600-c75a33fddb84" name="sf-get-active-queues" />
 		<flow-ref doc:name="sf-final-presenter" doc:id="14e78574-fab8-44f2-b704-36a29cff0544" name="sf-final-presenter"/>
+		<logger level="INFO" doc:name="Payload" doc:id="81fadf37-e45f-4155-876f-afd71649f1aa" message="#[payload]" />
 		<error-handler ref="error-handler" />
 	</flow>
 	<flow name="mf-dlq-dashboard-get-queue-messages" doc:id="a9e99352-1332-4a40-81fc-7710f37d160f" >
@@ -22,8 +23,16 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
 			</http:error-response>
 		</http:listener>
+		<ee:transform doc:name="Var queueName" doc:id="10c484b6-26ef-4330-80e1-37fe27be2a6b" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="queueName" ><![CDATA[attributes.uriParams.queueName]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
 		<flow-ref doc:name="sf-get-queue-messages" doc:id="e7b57d37-5319-4b24-a052-e11a61ef0b0e" name="sf-get-queue-messages" />
 		<flow-ref doc:name="sf-final-presenter" doc:id="833e0082-f161-47b5-a292-595623bca440" name="sf-final-presenter" />
+		<logger level="INFO" doc:name="Payload" doc:id="a4e275fc-a378-4cc5-a825-41cc767bd522" message="#[payload]" />
 		<error-handler ref="error-handler" />
 	</flow>
 	<flow name="mf-dlq-dashboard-post-queue-messages" doc:id="7c43b281-dc5e-4f27-8b6c-edd817c8af18" >
@@ -32,8 +41,49 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
 			</http:error-response>
 		</http:listener>
+		<ee:transform doc:name="Var queueName" doc:id="91182089-73e3-45df-b9b0-b230789baa63">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="queueName"><![CDATA[attributes.uriParams.queueName]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
 		<flow-ref doc:name="sf-post-queue-messages" doc:id="98907140-cb2c-43a3-9376-ccf62537d8e2" name="sf-post-queue-messages" />
 		<flow-ref doc:name="sf-final-presenter" doc:id="6749d5b1-2767-4d71-8081-76c823079320" name="sf-final-presenter" />
+		<logger level="INFO" doc:name="Payload" doc:id="c1ec07b6-b07d-41a4-8330-b69a12f661c6" message="#[payload]" />
+		<error-handler ref="error-handler" />
+	</flow>
+	<flow name="mf-dlq-dashboard-purge-queue" doc:id="d17dd97d-c878-442d-a7d5-275fe4e40375" >
+		<http:listener doc:name="GET /Purge/{queueName}" doc:id="1e8dc03c-5e5e-499e-9165-432cdbd5a745" config-ref="HTTP_Listener_config" path="/Purge/{queueName}" allowedMethods="GET">
+			<http:error-response >
+				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<ee:transform doc:name="Var queueName" doc:id="cbe1bc29-6d77-45cf-bf29-cfd06645c5c6">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="queueName"><![CDATA[attributes.uriParams.queueName]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sf-purge-queue" doc:id="68caac7f-de6e-47f7-9e4b-6a57f97ea8d5" name="sf-purge-queue"/>
+		<flow-ref doc:name="sf-final-presenter" doc:id="e91b82e9-4fed-4a30-aa38-5064130ed921" name="sf-final-presenter" />
+		<logger level="INFO" doc:name="Payload" doc:id="9b8a2d3b-dbd8-4027-ba17-b73d7322bf06" message="#[payload]" />
+		<error-handler ref="error-handler" />
+	</flow>
+	<flow name="mf-dlq-dashboard-delete-queue-messages" doc:id="ec9126c7-c0b6-4e8a-9d62-afd6430e04e0" >
+		<http:listener doc:name="POST /Delete/{queueName}" doc:id="1d6636c9-7be2-4396-bed1-fd94165f9326" config-ref="HTTP_Listener_config" path="/Delete/{queueName}" allowedMethods="POST" >
+			<http:error-response >
+				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<ee:transform doc:name="Var queueName" doc:id="cad4cbfa-0f6d-4576-b20c-c19af5719816" >
+			<ee:message />
+			<ee:variables >
+				<ee:set-variable variableName="queueName" ><![CDATA[attributes.uriParams.queueName]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sf-delete-queue-messages" doc:id="97a31161-f4fb-4900-ac56-8c7386b62e5e" name="sf-delete-queue-messages" />
+		<flow-ref doc:name="sf-final-presenter" doc:id="733ffe41-2b21-40fd-bd4b-c4aa9c2081d8" name="sf-final-presenter" />
+		<logger level="INFO" doc:name="Payload" doc:id="34a2c150-0607-4ecd-aea7-77c058c63298" message="#[payload]" />
 		<error-handler ref="error-handler" />
 	</flow>
 </mule>

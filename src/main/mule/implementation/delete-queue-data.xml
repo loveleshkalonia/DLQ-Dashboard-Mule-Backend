@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:sqs="http://www.mulesoft.org/schema/mule/sqs"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd">
+	<sub-flow name="sf-purge-queue" doc:id="fc25409f-94a1-4235-80ae-6b05f8b9907d" >
+		<sqs:get-queue-url doc:name="Var queueName" doc:id="3154dfc2-8353-439c-9b01-b77259d173be" config-ref="Amazon_SQS_Configuration" queueName="#[vars.queueName]" />
+		<sqs:purge-queue doc:name="Queue URL" doc:id="1952daff-6403-43f2-88a9-7a72712f1aff" config-ref="Amazon_SQS_Configuration" queueUrl="#[payload]"/>
+		<ee:transform doc:name="Purge Message" doc:id="1a01a2e4-a038-4a7a-ba2b-cee09c720836" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[output application/json
+---
+{
+	"requestId": payload,
+	"message": vars.queueName ++ " has been purged."
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="sf-delete-queue-messages" doc:id="febeb684-389f-49f7-9308-f3485186249a" >
+		<json:validate-schema doc:name="Message Ids Array" doc:id="34701cd6-5c2e-44ad-b92d-fc97b3ff2008" schema="schemas/delete-queue-msg.json" />
+		<set-variable value="#[payload]" doc:name="messageIds" doc:id="11f38ce3-4a65-496d-80d7-63ae20bebf9e" variableName="messageIds"/>
+		<sqs:get-queue-url doc:name="Var queueName | Set Var queueUrl" doc:id="3af8d56e-2d65-4ed8-8fe6-46fb1aaf4e35" config-ref="Amazon_SQS_Configuration" queueName="#[vars.queueName]" target="queueUrl" />
+		<sqs:read doc:name="10 Messages" doc:id="bddf4964-cb4c-4c8f-b66c-4847208ff5d4" config-ref="Amazon_SQS_Configuration" maxNumberOfMessages="10" queueUrl="#[vars.queueUrl]" />
+		<ee:transform doc:name="Remove binaryValue Key" doc:id="ac86967d-89a9-409d-9e0f-75e7da4cf77f">
+			<ee:message>
+				<ee:set-payload resource="dwl/fetch-queue-data/msg-remove-binaryValue-key.dwl" />
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Filter receiptHandle &amp; id" doc:id="f1d4b793-93ed-47a5-9b26-1456022770e3">
+			<ee:message>
+				<ee:set-payload resource="dwl/delete-queue-data/msg-filter-receiptHandle-and-id.dwl" />
+			</ee:message>
+		</ee:transform>
+		<choice doc:name="Check Payload Size" doc:id="e0283b32-cd79-4507-9d0b-e90e71908af2" >
+			<when expression="#[sizeOf(payload) &lt; 1]">
+				<raise-error doc:name="No message(s) found" doc:id="1ba3c48e-5117-4c45-85df-0f4aafceabc0" type="ANY:NOT_FOUND" description="No message(s) found for the input message id(s)"/>
+			</when>
+			<otherwise >
+				<sqs:delete-message-batch doc:name="Receipt Handles" doc:id="30b58039-38ae-4ba2-a9a8-b830190f31a1" config-ref="Amazon_SQS_Configuration" entries="#[payload]" queueUrl="#[vars.queueUrl]" />
+			</otherwise>
+		</choice>
+	</sub-flow>
+</mule>
