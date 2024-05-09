@@ -7,6 +7,13 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/current/mule-sqs.xsd">
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="21b6e280-e1c1-4852-a4c0-9670576db872" basePath="/Queue" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
+		<http:listener-interceptors >
+			<http:cors-interceptor >
+				<http:origins >
+					<http:origin url="http://localhost:3000" accessControlMaxAge="5" />
+				</http:origins>
+			</http:cors-interceptor>
+		</http:listener-interceptors>
 	</http:listener-config>
 	<sqs:config name="Amazon_SQS_Configuration" doc:name="Amazon SQS Configuration" doc:id="ef6ade6c-9309-4c0b-a584-56547b07a79d" waitTime="${aws.sqs.maxPollingDuration}">
 		<sqs:role-connection roleARN="${aws.role.arn}" accessKey="${aws.access.key}" secretKey="${aws.secret.key}" region="${aws.region}" />
