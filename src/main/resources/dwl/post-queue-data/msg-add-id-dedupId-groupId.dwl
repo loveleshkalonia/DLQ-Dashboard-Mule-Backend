@@ -7,7 +7,7 @@ payload map ((item, index) ->
     }) ++
     {
         "id": uuid(),
-        "deduplicationId": dw::Crypto::MD5(now() as String),
+        "deduplicationId": dw::Crypto::MD5(uuid()),
         "groupId": "mule-backend"
     }
 )
