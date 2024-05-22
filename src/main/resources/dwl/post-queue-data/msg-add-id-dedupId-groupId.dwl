@@ -1,3 +1,8 @@
+/*
+	DWL Path:
+	/src/main/resources/dwl/post-queue-data/msg-add-id-dedupId-groupId.dwl
+*/
+
 %dw 2.0
 output application/json
 ---

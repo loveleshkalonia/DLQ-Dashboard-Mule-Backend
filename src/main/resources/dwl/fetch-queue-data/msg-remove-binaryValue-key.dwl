@@ -1,3 +1,8 @@
+/*
+	DWL Path:
+	/src/main/resources/dwl/fetch-queue-data/msg-remove-binaryValue-key.dwl
+*/
+
 %dw 2.0
 import removeKeyValuePair from modules::common
 output application/json skipNullOn="everywhere"

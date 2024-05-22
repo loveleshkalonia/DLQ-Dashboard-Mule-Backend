@@ -86,4 +86,23 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<logger level="INFO" doc:name="Payload" doc:id="34a2c150-0607-4ecd-aea7-77c058c63298" message="#[payload]" />
 		<error-handler ref="error-handler" />
 	</flow>
+	<flow name="mf-dlq-dashboard-transfer-queue-messages" doc:id="11fbe615-efda-4495-8a75-e4f152e98fb6" >
+		<http:listener doc:name="POST /Transfer" doc:id="6ee1b7e9-5adb-44c6-987b-2651f1dfa601" config-ref="HTTP_Listener_config" path="/Transfer" allowedMethods="POST, OPTIONS" >
+			<http:error-response >
+				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<ee:transform doc:name="Var srcQueue, destQueue" doc:id="f1049ced-2c2b-4172-ba72-6f619e7acaa3" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="srcQueue" ><![CDATA[attributes.queryParams.srcQueue]]></ee:set-variable>
+				<ee:set-variable variableName="destQueue" ><![CDATA[attributes.queryParams.destQueue]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sf-transfer-queue-messages" doc:id="633cea70-c39f-4ca3-8253-b2fe190ea5d0" name="sf-transfer-queue-messages"/>
+		<flow-ref doc:name="sf-final-presenter" doc:id="2e9c349b-d2c1-41ed-8a29-83c632a0710e" name="sf-final-presenter" />
+		<logger level="INFO" doc:name="Payload" doc:id="6d3f4166-a437-4b91-aea1-61bd59675704" message="#[payload]" />
+		<error-handler ref="error-handler" />
+	</flow>
 </mule>

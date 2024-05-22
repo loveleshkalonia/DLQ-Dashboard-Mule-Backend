@@ -43,6 +43,12 @@ Delete (From the first 10) messages (Maximum 10) from the specified {queueName} 
 The body for this request is an Array of Strings which represensts message "id" of an SQS message. It is validated against the "/src/main/resources/schemas/delete-queue-msg.json" JSON schema.\
 You can find an example payload in the Hoppscotch collection.
 
+## POST: /Queue/Transfer
+
+Transfers (From the first 10) messages (Maximum 10) from the specified "srcQueue" (Query Parameter) SQS queue to specified "destQueue" (Query Parameter) SQS queue. Under the hood, it deletes the messages from "srcQueue" SQS queue and sends them to the "destQueue" SQS queue.\
+The body for this request is an Array of Strings which represensts message "id" of an SQS message. It is validated against the "/src/main/resources/schemas/transfer-queue-msg.json" JSON schema.\
+You can find an example payload in the Hoppscotch collection.
+
 ### Important Note:
 
 I would recommend setting the Visibility Timeout to approximately 3-5 seconds. The reason for this is to account for the operation of the 'POST: /Queue/Delete/{queueName}' endpoint. This also implies that consecutive requests made to fetch the approximate number of messages in the queue or to read the messages from the queue should also be made with a gap of 3-5 seconds.
