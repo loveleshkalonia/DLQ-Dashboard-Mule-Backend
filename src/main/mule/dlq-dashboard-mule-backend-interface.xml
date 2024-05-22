@@ -36,7 +36,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<error-handler ref="error-handler" />
 	</flow>
 	<flow name="mf-dlq-dashboard-post-queue-messages" doc:id="7c43b281-dc5e-4f27-8b6c-edd817c8af18" >
-		<http:listener doc:name="POST /{queueName}" doc:id="6a71e4c2-59ed-4264-84b7-f69ec0a109d8" config-ref="HTTP_Listener_config" path="/{queueName}" allowedMethods="POST" >
+		<http:listener doc:name="POST /{queueName}" doc:id="6a71e4c2-59ed-4264-84b7-f69ec0a109d8" config-ref="HTTP_Listener_config" path="/{queueName}" allowedMethods="POST, OPTIONS" >
 			<http:error-response >
 				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
 			</http:error-response>
@@ -70,7 +70,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<error-handler ref="error-handler" />
 	</flow>
 	<flow name="mf-dlq-dashboard-delete-queue-messages" doc:id="ec9126c7-c0b6-4e8a-9d62-afd6430e04e0" >
-		<http:listener doc:name="POST /Delete/{queueName}" doc:id="1d6636c9-7be2-4396-bed1-fd94165f9326" config-ref="HTTP_Listener_config" path="/Delete/{queueName}" allowedMethods="POST" >
+		<http:listener doc:name="POST /Delete/{queueName}" doc:id="1d6636c9-7be2-4396-bed1-fd94165f9326" config-ref="HTTP_Listener_config" path="/Delete/{queueName}" allowedMethods="POST, OPTIONS" >
 			<http:error-response >
 				<http:body ><![CDATA[#[output application/json --- payload]]]></http:body>
 			</http:error-response>

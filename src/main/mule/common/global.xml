@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/sqs http://www.mulesoft.org/schema/mule/sqs/
 		<http:listener-interceptors >
 			<http:cors-interceptor >
 				<http:origins >
-					<http:origin url="http://localhost:3000" accessControlMaxAge="5" />
+					<http:public-resource />
 				</http:origins>
 			</http:cors-interceptor>
 		</http:listener-interceptors>
