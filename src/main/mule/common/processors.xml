@@ -11,4 +11,11 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			</ee:message>
 		</ee:transform>
 	</sub-flow>
+	<sub-flow name="sf-check-payload-size-msg-ids" doc:id="7c3eb205-bc05-465a-b586-586529491bc6" >
+		<choice doc:name="Check Payload Size" doc:id="11fe5212-f70c-4035-93b4-6789c38cb030">
+			<when expression="#[sizeOf(payload) &lt; 1]">
+				<raise-error doc:name="No message(s) found" doc:id="3637c072-2d22-4f24-9ea6-721d4e3002a3" type="ANY:NOT_FOUND" description="No message(s) found for the input message id(s)" />
+			</when>
+		</choice>
+	</sub-flow>
 </mule>

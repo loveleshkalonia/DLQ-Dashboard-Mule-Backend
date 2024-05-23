@@ -6,11 +6,22 @@
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<error-handler name="error-handler" doc:id="b7789970-5ced-430b-9876-5564d9ed0df5" >
 		<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="4398cdee-996f-4d09-a693-994c079c30db" type="ANY">
-			<ee:transform doc:name="Error Message" doc:id="7c7db48c-64c0-4d42-8967-049ba8622992" >
-				<ee:message >
+			<choice doc:name="Check Composite Routing Error" doc:id="32cd492d-1a20-4301-a659-9bef94bae4fa" >
+				<when expression='#[error.errorType.identifier == "COMPOSITE_ROUTING"]'>
+					<ee:transform doc:name="Composite Error Message" doc:id="781d68b1-c1a0-4497-b3db-52e1852e1de9" >
+						<ee:message >
+							<ee:set-payload resource="dwl/common/composite-error-response-default.dwl" />
+						</ee:message>
+					</ee:transform>
+				</when>
+				<otherwise >
+					<ee:transform doc:name="Error Message" doc:id="7c7db48c-64c0-4d42-8967-049ba8622992">
+				<ee:message>
 					<ee:set-payload resource="dwl/common/error-response-default.dwl" />
 				</ee:message>
 			</ee:transform>
+				</otherwise>
+			</choice>
 		</on-error-propagate>
 	</error-handler>
 </mule>

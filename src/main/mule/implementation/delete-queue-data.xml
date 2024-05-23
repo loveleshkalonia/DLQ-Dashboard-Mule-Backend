@@ -35,13 +35,7 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
 				<ee:set-payload resource="dwl/delete-queue-data/msg-filter-receiptHandle-and-id.dwl" />
 			</ee:message>
 		</ee:transform>
-		<choice doc:name="Check Payload Size" doc:id="e0283b32-cd79-4507-9d0b-e90e71908af2" >
-			<when expression="#[sizeOf(payload) &lt; 1]">
-				<raise-error doc:name="No message(s) found" doc:id="1ba3c48e-5117-4c45-85df-0f4aafceabc0" type="ANY:NOT_FOUND" description="No message(s) found for the input message id(s)"/>
-			</when>
-			<otherwise >
-				<sqs:delete-message-batch doc:name="Receipt Handles" doc:id="30b58039-38ae-4ba2-a9a8-b830190f31a1" config-ref="Amazon_SQS_Configuration" entries="#[payload]" queueUrl="#[vars.queueUrl]" />
-			</otherwise>
-		</choice>
+		<flow-ref doc:name="sf-check-payload-size-msg-ids" doc:id="c88449c4-9864-4bfe-b3b6-c5d2b1b711aa" name="sf-check-payload-size-msg-ids" />
+		<sqs:delete-message-batch doc:name="Receipt Handles" doc:id="30b58039-38ae-4ba2-a9a8-b830190f31a1" config-ref="Amazon_SQS_Configuration" entries="#[payload]" queueUrl="#[vars.queueUrl]" />
 	</sub-flow>
 </mule>

@@ -9,42 +9,50 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	<sub-flow name="sf-transfer-queue-messages" doc:id="40aa7f3a-7cd8-4298-bb64-5691455a43fd" >
 		<json:validate-schema doc:name="Message Ids Array" doc:id="f019c15e-093a-4bea-a354-1f5e4505c7d4" schema="schemas/transfer-queue-msg.json" />
 		<set-variable value="#[payload]" doc:name="messageIds" doc:id="d7edd4b0-312b-48e5-874a-a189085516a2" variableName="messageIds" />
-		<scatter-gather doc:name="Get Queue URLs" doc:id="31d25695-719b-4dcd-87a6-d3eb90f4c19c" >
-			<route >
-				<sqs:get-queue-url doc:name="Var srcQueue | Set Var srcQueueUrl" doc:id="e8a02d5d-6cab-4611-ad41-d253003d8dbe" config-ref="Amazon_SQS_Configuration" queueName="#[vars.srcQueue]" target="srcQueueUrl" />
-			</route>
-			<route >
-				<sqs:get-queue-url doc:name="Var destQueue | Set Var destQueueUrl" doc:id="9471dde3-db72-484c-bb24-cde6973868ef" config-ref="Amazon_SQS_Configuration" queueName="#[vars.destQueue]" target="destQueueUrl" />
-			</route>
-		</scatter-gather>
+		<flow-ref doc:name="sf-fetch-queue-urls" doc:id="8c114d96-27bd-4f79-97d9-497ff4a1872f" name="sf-fetch-queue-urls" />
 		<sqs:read doc:name="10 Messages from srcQueue" doc:id="6cdbf658-4582-40c8-ab28-b4403decb464" config-ref="Amazon_SQS_Configuration" maxNumberOfMessages="10" queueUrl="#[vars.srcQueueUrl]" />
 		<ee:transform doc:name="Remove binaryValue Key" doc:id="924e09bd-b8ac-4be8-b10c-7e65d75bf765">
 			<ee:message>
 				<ee:set-payload resource="dwl/fetch-queue-data/msg-remove-binaryValue-key.dwl" />
 			</ee:message>
 		</ee:transform>
-		<scatter-gather doc:name="Send To destQueue | Delete from srcQueue" doc:id="31e0e451-aef6-4ad3-8b1c-fdcb75f866d2" >
-			<route >
-				<ee:transform doc:name="Filter id | Add deduplicationId, groupId | Remove receiptHandle" doc:id="462fbfe8-0581-4497-8626-96a44c4928e3">
-			<ee:message>
-						<ee:set-payload resource="dwl/transfer-queue-data/msg-filter-id-add-dedupId-groupId-remove-receiptHandle.dwl" />
-			</ee:message>
-		</ee:transform>
-				<sqs:send-message-batch doc:name="Input Payload to destQueueUrl" doc:id="7961b4fa-ef0f-4805-a65e-690d31c19126" config-ref="Amazon_SQS_Configuration" queueUrl="#[vars.destQueueUrl]" />
-			</route>
-			<route >
-				<ee:transform doc:name="Filter receiptHandle &amp; id" doc:id="56035ad8-7d74-451a-a117-e1f49abd9316">
-			<ee:message>
-				<ee:set-payload resource="dwl/delete-queue-data/msg-filter-receiptHandle-and-id.dwl" />
-			</ee:message>
-		</ee:transform>
-				<sqs:delete-message-batch doc:name="Receipt Handles" doc:id="08de3037-0bdb-439c-8dbb-637312657805" config-ref="Amazon_SQS_Configuration" queueUrl="#[vars.srcQueueUrl]" entries="#[payload]" />
-			</route>
-		</scatter-gather>
+		<flow-ref doc:name="sf-send-and-delete-msg" doc:id="7414f8d5-40df-417b-a2a9-5398e2d3166f" name="sf-send-and-delete-msg" />
 		<ee:transform doc:name="Extract Payload" doc:id="28fbda1f-e64c-4322-92a4-9d2e2dd924df">
 			<ee:message>
 				<ee:set-payload resource="dwl/transfer-queue-data/msg-extract-payload.dwl" />
 			</ee:message>
 		</ee:transform>
+	</sub-flow>
+	<sub-flow name="sf-fetch-queue-urls" doc:id="40f1e243-23ba-4f76-a351-b5ba8244dcdf">
+		<scatter-gather doc:name="Get Queue URLs" doc:id="31d25695-719b-4dcd-87a6-d3eb90f4c19c">
+			<route>
+				<sqs:get-queue-url doc:name="Var srcQueue | Set Var srcQueueUrl" doc:id="e8a02d5d-6cab-4611-ad41-d253003d8dbe" config-ref="Amazon_SQS_Configuration" queueName="#[vars.srcQueue]" target="srcQueueUrl" />
+			</route>
+			<route>
+				<sqs:get-queue-url doc:name="Var destQueue | Set Var destQueueUrl" doc:id="9471dde3-db72-484c-bb24-cde6973868ef" config-ref="Amazon_SQS_Configuration" queueName="#[vars.destQueue]" target="destQueueUrl" />
+			</route>
+		</scatter-gather>
+	</sub-flow>
+	<sub-flow name="sf-send-and-delete-msg" doc:id="acd372b7-3bf8-4543-86dc-4b95ee7dde6c">
+		<scatter-gather doc:name="Send To destQueue | Delete from srcQueue" doc:id="31e0e451-aef6-4ad3-8b1c-fdcb75f866d2">
+			<route>
+				<ee:transform doc:name="Filter id | Add deduplicationId, groupId | Remove receiptHandle" doc:id="462fbfe8-0581-4497-8626-96a44c4928e3">
+			<ee:message>
+						<ee:set-payload resource="dwl/transfer-queue-data/msg-filter-id-add-dedupId-groupId-remove-receiptHandle.dwl" />
+			</ee:message>
+		</ee:transform>
+				<flow-ref doc:name="sf-check-payload-size-msg-ids" doc:id="ab6509c6-fccf-45b8-9ba5-80ceebcee1ca" name="sf-check-payload-size-msg-ids" />
+				<sqs:send-message-batch doc:name="Input Payload to destQueueUrl" doc:id="7961b4fa-ef0f-4805-a65e-690d31c19126" config-ref="Amazon_SQS_Configuration" queueUrl="#[vars.destQueueUrl]" />
+			</route>
+			<route>
+				<ee:transform doc:name="Filter receiptHandle &amp; id" doc:id="56035ad8-7d74-451a-a117-e1f49abd9316">
+			<ee:message>
+				<ee:set-payload resource="dwl/delete-queue-data/msg-filter-receiptHandle-and-id.dwl" />
+			</ee:message>
+		</ee:transform>
+				<flow-ref doc:name="sf-check-payload-size-msg-ids" doc:id="3cb8e8ed-44b3-47ba-92f1-383619d648a0" name="sf-check-payload-size-msg-ids" />
+				<sqs:delete-message-batch doc:name="Receipt Handles" doc:id="08de3037-0bdb-439c-8dbb-637312657805" config-ref="Amazon_SQS_Configuration" queueUrl="#[vars.srcQueueUrl]" entries="#[payload]" />
+			</route>
+		</scatter-gather>
 	</sub-flow>
 </mule>
