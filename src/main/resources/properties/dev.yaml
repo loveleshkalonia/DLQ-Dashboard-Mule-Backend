@@ -7,4 +7,4 @@ aws:
   secret:
     key: "dummy"
   sqs:
-    maxPollingDuration: "10"
+    maxPollingDuration: "5"
