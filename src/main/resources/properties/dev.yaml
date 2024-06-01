@@ -1,3 +1,6 @@
+http:
+  port: "8081"
+
 aws:
   region: "dummy"
   role:

@@ -17,6 +17,8 @@ If you need help setting up an AWS IAM Role to run this code locally, click [her
 
 You can find Sample API Requests collection exported from [Hoppscotch](https://hoppscotch.io/) here: "/hoppscotch-collection/DLQ-Dashboard-Mule-Backend.json".
 
+All endpoints featuring the POST method can also be used with the OPTIONS method. This is done because of the way [Axios](https://axios-http.com/docs/intro) Client makes API Calls in the [DLQ-Dashboard-Frontend](https://github.com/loveleshkalonia/DLQ-Dashboard-Frontend) React App code. In short, Axios sends an OPTIONS Request before making a POST Request.
+
 Learn more about the available endpoints below:
 
 ## GET: /Queue/Active
