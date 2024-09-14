@@ -145,3 +145,11 @@ ___
 
 I would recommend setting the Visibility Timeout of the SQS Queues to approximately 3-5 seconds in AWS Console. The reason for this is to account for the operation of the 'POST: /Queue/Delete/{queueName}' and 'POST: /Queue/Transfer' endpoints.\
 This also implies that consecutive requests made to fetch the approximate number of messages in the queue or to read the messages from the queue should also be made with a gap of 3-5 seconds.
+
+___
+
+### Supporting links:
+
+[Blog Article](https://www.loveleshkalonia.com/2024/06/dlq-dashboard-using-react-js-and-mulesoft.html)
+
+[Demo Video](https://www.youtube.com/watch?v=4r01T9vfdx8)
